@@ -1,2 +1,2 @@
-# batch-script
+# batch-scripts
 Scripts for windows
