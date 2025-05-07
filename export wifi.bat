@@ -1,26 +1,31 @@
 @echo off
-setlocal
+setlocal enabledelayedexpansion
 
-:: Folder do zapisu backupu
-set backupFolder=%USERPROFILE%\Desktop\Backup-WiFi
+:: Folder for backup files
+set "backupFolder=%USERPROFILE%\Desktop\Backup-WiFi"
 
-:: Tworzenie folderu
-mkdir "%backupFolder%"
+:: Create folder (if you didn't have)
+if not exist "%backupFolder%" (
+    mkdir "%backupFolder%"
+)
 
-echo Szukam zapisanych profili Wi-Fi...
+echo Searching for profile Wi-Fi...
 
-:: Pobranie listy wszystkich profili
+:: Download All User Profile
 for /f "tokens=*" %%i in ('netsh wlan show profiles ^| findstr "All User Profile"') do (
     set "line=%%i"
     setlocal enabledelayedexpansion
-    set "profileName=!line:All User Profile     =!"
-    echo Eksportuje profil: !profileName!
-    netsh wlan export profile name="!profileName!" folder="%backupFolder%" key=clear >nul
+    for /f "tokens=1,* delims=:" %%a in ("!line!") do (
+        set "profileName=%%b"
+        set "profileName=!profileName:~1!"  :: Remove leading space
+        echo Eksportuję: !profileName!
+        netsh wlan export profile name="!profileName!" folder="%backupFolder%" key=clear >nul
+    )
     endlocal
 )
 
 echo ---
-echo Gotowe!
-echo Backup zapisany w: %backupFolder%
+echo Ready!
+echo Backup save in: %backupFolder%
 pause
 exit
